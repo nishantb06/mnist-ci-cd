@@ -10,15 +10,15 @@ class SimpleCNN(nn.Module):
         super(SimpleCNN, self).__init__()
         self.conv1 = nn.Conv2d(1, 10, kernel_size=3)
         self.conv2 = nn.Conv2d(10, 20, kernel_size=3)
-        self.fc1 = nn.Linear(20 * 5 * 5, 128)
+        self.fc1 = nn.Linear(20 * 5 * 5, 128)  # 20 channels * 5 * 5 spatial dimensions
         self.fc2 = nn.Linear(128, 10)
         self.pool = nn.MaxPool2d(2)
         self.relu = nn.ReLU()
 
     def forward(self, x):
-        x = self.pool(self.relu(self.conv1(x)))
-        x = self.pool(self.relu(self.conv2(x)))
-        x = x.view(-1, 64 * 5 * 5)
+        x = self.pool(self.relu(self.conv1(x)))  # After pool: 13x13
+        x = self.pool(self.relu(self.conv2(x)))  # After pool: 5x5 
+        x = x.view(-1, 20 * 5 * 5)  # Flatten: 20 channels * 5 * 5 spatial dimensions
         x = self.relu(self.fc1(x))
         x = self.fc2(x)
         return x
