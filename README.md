@@ -1,0 +1,1 @@
+# CI/CD Pipeline for MNIST Training setup
