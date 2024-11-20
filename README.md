@@ -1,1 +1,13 @@
-# CI/CD Pipeline for MNIST Training setup
+# ML Model CI/CD Pipeline
+
+This project demonstrates a basic CI/CD pipeline for a machine learning model using PyTorch and GitHub Actions.
+
+## Project Structure
+- `train.py`: Script for training the model
+- `test_model.py`: Test script for model validation
+- `.github/workflows/ml-pipeline.yml`: GitHub Actions workflow configuration
+- `requirements.txt`: Python dependencies
+
+## Local Setup and Testing
+
+1. Create a virtual environment:
