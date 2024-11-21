@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torchvision import datasets, transforms
-from train import SimpleCNN
+from train import SimpleCNN,Net
 import glob
 import pytest
 
@@ -10,7 +10,7 @@ def get_latest_model():
     return max(model_files) if model_files else None
 
 def test_model_architecture():
-    model = SimpleCNN()
+    model = Net()
     
     # Test input shape
     test_input = torch.randn(1, 1, 28, 28)
@@ -19,11 +19,11 @@ def test_model_architecture():
     
     # Count parameters
     total_params = sum(p.numel() for p in model.parameters())
-    assert total_params < 100000, f"Model has {total_params} parameters, should be less than 100000"
+    assert total_params < 25000, f"Model has {total_params} parameters, should be less than 25000"
 
 def test_model_accuracy():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = SimpleCNN().to(device)
+    model = Net().to(device)
     
     # Load the latest model
     model_path = get_latest_model()
@@ -52,7 +52,7 @@ def test_model_accuracy():
             correct += (predicted == target).sum().item()
     
     accuracy = 100 * correct / total
-    assert accuracy > 80, f"Model accuracy is {accuracy}%, should be > 80%"
+    assert accuracy > 95, f"Model accuracy is {accuracy}%, should be > 95%"
 
 if __name__ == "__main__":
     pytest.main([__file__]) 
