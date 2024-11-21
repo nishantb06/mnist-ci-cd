@@ -61,3 +61,6 @@ wandb/
 Thumbs.db
 
 .pytest_cache
+
+# Add this line to existing .gitignore
+augmentation_samples/

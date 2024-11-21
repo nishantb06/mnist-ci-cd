@@ -5,6 +5,8 @@ from torchvision import datasets, transforms
 from datetime import datetime
 import os
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
+from torchvision.utils import save_image
 
 class SimpleCNN(nn.Module):
     def __init__(self):
@@ -96,9 +98,13 @@ def train():
     
     # Load MNIST dataset
     transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,))
-    ])
+                                      #  transforms.Resize((28, 28)),
+                                       transforms.ColorJitter(brightness=0.10, contrast=0.1, saturation=0.10, hue=0.1),
+                                       transforms.RandomRotation((-7.0, 7.0), fill=(1,)),
+                                       transforms.ToTensor(),
+                                       transforms.Normalize((0.1307,), (0.3081,)) # The mean and std have to be sequences (e.g., tuples), therefore you should add a comma after the values. 
+                                       # Note the difference between (0.1307) and (0.1307,)
+                                       ])
     
     train_dataset = datasets.MNIST('data', train=True, download=True, transform=transform)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True)
@@ -127,5 +133,60 @@ def train():
     torch.save(model.state_dict(), model_path)
     print(f"Model saved as {model_path}")
 
+def visualize_augmentations():
+    # Create directory if it doesn't exist
+    save_dir = 'augmentation_samples'
+    os.makedirs(save_dir, exist_ok=True)
+    
+    # Define the transform
+    transform = transforms.Compose([
+        transforms.ColorJitter(brightness=0.10, contrast=0.1, saturation=0.10, hue=0.1),
+        transforms.RandomRotation((-7.0, 7.0), fill=(1,)),
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,))
+    ])
+    
+    # Load a single batch from MNIST
+    dataset = datasets.MNIST('data', train=True, download=True, transform=None)
+    
+    # Create figure for visualization
+    fig, axes = plt.subplots(2, 5, figsize=(15, 6))
+    
+    for idx in range(5):
+        # Get original image
+        image, label = dataset[idx]
+        
+        # Convert to tensor for saving
+        original_tensor = transforms.ToTensor()(image)
+        
+        # Apply transformations
+        augmented_image = transform(image)
+        
+        # Denormalize for visualization
+        augmented_display = augmented_image.clone()
+        augmented_display = augmented_display * 0.3081 + 0.1307
+        
+        # Plot original
+        axes[0][idx].imshow(image, cmap='gray')
+        axes[0][idx].set_title(f'Original (Label: {label})')
+        axes[0][idx].axis('off')
+        
+        # Plot augmented
+        axes[1][idx].imshow(augmented_display[0], cmap='gray')
+        axes[1][idx].set_title('Augmented')
+        axes[1][idx].axis('off')
+        
+        # Save individual images
+        save_image(original_tensor, f'{save_dir}/original_{idx}.png')
+        save_image(augmented_image, f'{save_dir}/augmented_{idx}.png')
+    
+    plt.tight_layout()
+    plt.savefig(f'{save_dir}/augmentation_comparison.png')
+    plt.close()
+    
+    print(f"Augmentation samples saved in '{save_dir}' directory")
+
 if __name__ == "__main__":
+    # Add this line to visualize augmentations before training
+    visualize_augmentations()
     train() 
