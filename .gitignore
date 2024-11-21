@@ -1,0 +1,61 @@
+# Data directory
+data/
+datasets/
+raw_data/
+
+# Model files
+*.pth
+*.pt
+*.ckpt
+*.h5
+model_*/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.env
+.venv
+env.bak/
+venv.bak/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+.project
+.pydevproject
+
+# Logs
+*.log
+logs/
+tensorboard/
+runs/
+wandb/
+
+# OS specific
+.DS_Store
+Thumbs.db
