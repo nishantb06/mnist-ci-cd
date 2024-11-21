@@ -1,6 +1,6 @@
 # ML Model CI/CD Pipeline
 
-[![ML Pipeline](https://github.com/nishantb06/mnist-c-cd/actions/workflows/ml-pipeline.yml/badge.svg)](https://github.com/nishantb06/mnist-ci-cd/actions/workflows/ml-pipeline.yml)
+[![ML Pipeline](https://github.com/nishantb06/mnist-ci-cd/actions/workflows/ml-pipeline.yml/badge.svg)](https://github.com/nishantb06/mnist-ci-cd/actions/workflows/ml-pipeline.yml)
 
 This project demonstrates a basic CI/CD pipeline for a machine learning model using PyTorch and GitHub Actions.
 
