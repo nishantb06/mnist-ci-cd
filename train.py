@@ -7,6 +7,8 @@ import os
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 from torchvision.utils import save_image
+from torchvision.transforms import functional as TF
+import random
 
 class SimpleCNN(nn.Module):
     def __init__(self):
@@ -92,19 +94,31 @@ class Net(nn.Module):
         x = x.view(-1, 10)
         return F.log_softmax(x, dim=-1)
 
+class ShearTransform:
+    def __init__(self, shear_range=(-10, 10)):
+        self.shear_range = shear_range
+        
+    def __call__(self, img):
+        shear = random.uniform(self.shear_range[0], self.shear_range[1])
+        return TF.affine(img, 
+                        angle=0,  # no rotation
+                        translate=[0, 0],  # no translation
+                        scale=1.0,  # no scaling
+                        shear=[shear, 0.0],  # shear only in x-direction
+                        interpolation=TF.InterpolationMode.BILINEAR,
+                        fill=1)  # fill with white
+
 def train():
-    # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
-    # Load MNIST dataset
+    # Updated transform pipeline with shear
     transform = transforms.Compose([
-                                      #  transforms.Resize((28, 28)),
-                                       transforms.ColorJitter(brightness=0.10, contrast=0.1, saturation=0.10, hue=0.1),
-                                       transforms.RandomRotation((-7.0, 7.0), fill=(1,)),
-                                       transforms.ToTensor(),
-                                       transforms.Normalize((0.1307,), (0.3081,)) # The mean and std have to be sequences (e.g., tuples), therefore you should add a comma after the values. 
-                                       # Note the difference between (0.1307) and (0.1307,)
-                                       ])
+        transforms.ColorJitter(brightness=0.10, contrast=0.1, saturation=0.10, hue=0.1),
+        transforms.RandomRotation((-7.0, 7.0), fill=(1,)),
+        ShearTransform(shear_range=(-10, 10)),  # Add shear transform
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,))
+    ])
     
     train_dataset = datasets.MNIST('data', train=True, download=True, transform=transform)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True)
@@ -134,23 +148,23 @@ def train():
     print(f"Model saved as {model_path}")
 
 def visualize_augmentations():
-    # Create directory if it doesn't exist
     save_dir = 'augmentation_samples'
     os.makedirs(save_dir, exist_ok=True)
     
-    # Define the transform
+    # Updated transform pipeline with shear
     transform = transforms.Compose([
         transforms.ColorJitter(brightness=0.10, contrast=0.1, saturation=0.10, hue=0.1),
         transforms.RandomRotation((-7.0, 7.0), fill=(1,)),
+        ShearTransform(shear_range=(-10, 10)),  # Add shear transform
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,))
     ])
     
-    # Load a single batch from MNIST
+    # Load dataset
     dataset = datasets.MNIST('data', train=True, download=True, transform=None)
     
     # Create figure for visualization
-    fig, axes = plt.subplots(2, 5, figsize=(15, 6))
+    fig, axes = plt.subplots(3, 5, figsize=(15, 9))  # Changed to 3 rows to show more variations
     
     for idx in range(5):
         # Get original image
@@ -159,26 +173,35 @@ def visualize_augmentations():
         # Convert to tensor for saving
         original_tensor = transforms.ToTensor()(image)
         
-        # Apply transformations
-        augmented_image = transform(image)
+        # Apply transformations twice to show variation
+        augmented_image1 = transform(image)
+        augmented_image2 = transform(image)
         
         # Denormalize for visualization
-        augmented_display = augmented_image.clone()
-        augmented_display = augmented_display * 0.3081 + 0.1307
+        augmented_display1 = augmented_image1.clone()
+        augmented_display1 = augmented_display1 * 0.3081 + 0.1307
+        
+        augmented_display2 = augmented_image2.clone()
+        augmented_display2 = augmented_display2 * 0.3081 + 0.1307
         
         # Plot original
         axes[0][idx].imshow(image, cmap='gray')
         axes[0][idx].set_title(f'Original (Label: {label})')
         axes[0][idx].axis('off')
         
-        # Plot augmented
-        axes[1][idx].imshow(augmented_display[0], cmap='gray')
-        axes[1][idx].set_title('Augmented')
+        # Plot two different augmentations
+        axes[1][idx].imshow(augmented_display1[0], cmap='gray')
+        axes[1][idx].set_title('Augmented 1')
         axes[1][idx].axis('off')
+        
+        axes[2][idx].imshow(augmented_display2[0], cmap='gray')
+        axes[2][idx].set_title('Augmented 2')
+        axes[2][idx].axis('off')
         
         # Save individual images
         save_image(original_tensor, f'{save_dir}/original_{idx}.png')
-        save_image(augmented_image, f'{save_dir}/augmented_{idx}.png')
+        save_image(augmented_image1, f'{save_dir}/augmented1_{idx}.png')
+        save_image(augmented_image2, f'{save_dir}/augmented2_{idx}.png')
     
     plt.tight_layout()
     plt.savefig(f'{save_dir}/augmentation_comparison.png')
@@ -187,6 +210,5 @@ def visualize_augmentations():
     print(f"Augmentation samples saved in '{save_dir}' directory")
 
 if __name__ == "__main__":
-    # Add this line to visualize augmentations before training
     visualize_augmentations()
     train() 
