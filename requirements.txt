@@ -1,5 +1,5 @@
+matplotlib
+pillow
 torch
 torchvision
 pytest
-matplotlib
-pillow
